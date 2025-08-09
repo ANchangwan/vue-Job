@@ -1,4 +1,7 @@
 <template>
+  <div class="loading_info" v-if="loading">
+    <span>회원가입 처리중</span>
+  </div>
   <div class="form-container">
     <form @submit.prevent="handleLogin">
       <div class="form-group">
@@ -29,55 +32,34 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from "vue-router";
+import supabase from "../supabase";
+
+const router = useRouter();
+const isLoading = ref(false);
 
 const email = ref('');
 const password = ref('');
 
-const handleLogin = () => {
-  console.log(email.value, password.value);
+const handleLogin = async () => {
+  isLoading.value = true;
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: email.value,
+    password: password.value,
+  });
+  if(error) {
+    alert(error.message);
+    console.log(error);
+  }else{
+    alert("로그인 성공");
+    await router.push('/job-list');
+    isLoading.value = false;
+  }
 }
 
 </script>
 
 <style scoped>
-.form-container {
-  max-width: 768px;
-  margin: 0 auto;
-  padding: 15px;
-  margin-top: 80px;
-  background-color: #fff;
-}
-
-.form-group {
-  margin-bottom: 24px;
-}
-
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-input {
-  width: 100%;
-  padding: 10px;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-button {
-  width: 100%;
-  padding: 10px;
-  background-color: var(--main-color-dark);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-bottom: 24px;
-}
-
-button:hover {
-  opacity: 0.8;
-}
+@import url("../styles/form.scss");
+@import url("../styles/loading.scss");
 </style>
